@@ -2,3 +2,6 @@
 *.csproj
 Library/
 Packages/
+.vs/
+obj/
+Temp/
