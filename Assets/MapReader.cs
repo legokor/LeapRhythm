@@ -11,29 +11,39 @@ public struct BoxEntry {
 }
 
 public class MapReader : MonoBehaviour {
+    const bool DebugMode = true;
+
     public AudioClip Song;
     public GameObject Dispenser;
     public int ChunkSize = 16384;
     public int Subchunks = 4;
-    [Tooltip("Smoothed samples in each direction.")]
-    public int Smoothing = 10;
-    [Tooltip("Hit detection decay time. Lower values increase difficulty.")]
-    public float Decay = 3;
+    [Tooltip("Smoothed samples in each direction. Should only be >1 on very intense tracks.")]
+    public int Smoothing = 1;
+    [Tooltip("Hit detection decay rate. Higher values increase difficulty.")]
+    public float Decay = .05f;
 
     [NonSerialized] public string Progress = string.Empty;
 
     const string ReadyText = "Ready";
 
-    float ChunkFrequency; // chunks / sec
+    /// <summary>
+    /// Chunks per second.
+    /// </summary>
+    float ChunkFrequency;
+    /// <summary>
+    /// RMS value of each chunk. In debug mode, these are used for chunk display.
+    /// </summary>
+    float[] ChunkCache;
     float[] Samples;
     int Channels, SampleRate, ChunkStep;
     Random Rand = new Random();
     Task Worker;
     List<BoxEntry> Boxes = new List<BoxEntry>();
 
-#if UNITY_EDITOR
-    float[] ChunkCache;
-#endif
+    // Debug vars
+    bool Spawned = false, WasBox = false;
+    int Box = 0;
+    float Playtime = 0;
 
     float[] GetChunkRMS() {
         Progress = "Preparing chunk division";
@@ -63,31 +73,30 @@ public class MapReader : MonoBehaviour {
         return Smoothed;
     }
 
-    void AddBox(float Timestamp) {
+    void AddBox(float Timestamp, Vector2 Position) {
         Boxes.Add(new BoxEntry() {
             Timestamp = Timestamp,
-            Position = new Vector2((float)Rand.NextDouble() * 2 - 1, (float)Rand.NextDouble() * 2 - 1)
+            Position = Position
         });
     }
 
     void Loader() {
         ChunkFrequency = SampleRate * Subchunks / (float)ChunkSize;
-        float[] ChunkRMS = Smooth(GetChunkRMS());
-#if UNITY_EDITOR
-        ChunkCache = ChunkRMS;
-#endif
+        ChunkCache = Smooth(GetChunkRMS());
         int LastRMSBox = 0;
         float ToSeconds = ChunkStep / (float)SampleRate;
-        for (int Chunk = 1, End = ChunkRMS.Length - 1; Chunk < End; ++Chunk) {
-            ChunkRMS[Chunk + 1] = Mathf.Max(ChunkRMS[Chunk] - Decay / ChunkFrequency, ChunkRMS[Chunk + 1]); // Smoothing
-            if (ChunkRMS[Chunk] > ChunkRMS[Chunk - 1] && ChunkRMS[Chunk] > ChunkRMS[Chunk + 1]) {
+        for (int Chunk = 1, End = ChunkCache.Length - 1; Chunk < End; ++Chunk) {
+            ChunkCache[Chunk + 1] = Mathf.Max(ChunkCache[Chunk] - Decay / ChunkFrequency, ChunkCache[Chunk + 1]); // Smoothing
+            if (ChunkCache[Chunk] > ChunkCache[Chunk - 1] && ChunkCache[Chunk] > ChunkCache[Chunk + 1]) {
                 int Punch = Chunk - LastRMSBox;
                 LastRMSBox = Chunk;
                 float PunchDelta = Punch * ToSeconds;
-                if (PunchDelta > .1f) { // TODO: structures, not pure random
+                if (PunchDelta > .1f) {
                     float Timestamp = Chunk * ChunkStep / (float)SampleRate;
-                    AddBox(Timestamp);
-                    if (PunchDelta > .5f) AddBox(Timestamp);
+                    // TODO: don't spawn in the middle
+                    Vector2 BoxPos = new Vector2((float)Rand.NextDouble() * 2 - 1, (float)Rand.NextDouble() * 2 - 1);
+                    AddBox(Timestamp, BoxPos);
+                    if (PunchDelta > .5f) AddBox(Timestamp, new Vector2(-BoxPos.x, Rand.NextDouble() > .25 ? BoxPos.y : -BoxPos.y));
                 }
             }
         }
@@ -104,43 +113,47 @@ public class MapReader : MonoBehaviour {
         Worker.Start();
     }
 
-#if UNITY_EDITOR
-    bool Spawned = false;
-    float Playtime = 0;
-
     void OnGUI() {
         if (ChunkCache == null)
             return;
         Texture2D Hue = new Texture2D(1, 1);
         int LastHSVTick = -1;
+        if (WasBox) {
+            Hue.SetPixel(1, 1, Color.white);
+            Hue.Apply();
+        }
         int PlayPos = Mathf.RoundToInt(Playtime * ChunkFrequency);
         for (int i = PlayPos, e = Math.Min(ChunkCache.Length, PlayPos + 250); i < e; ++i) {
-            int HSVTick = Mathf.FloorToInt(i / ChunkFrequency);
-            if (HSVTick != LastHSVTick) {
-                Hue.SetPixel(0, 0, Color.HSVToRGB((LastHSVTick = HSVTick) * .2f % 1, 1, 1));
-                Hue.Apply();
+            if (!WasBox) {
+                int HSVTick = Mathf.FloorToInt(i / ChunkFrequency);
+                if (HSVTick != LastHSVTick) {
+                    Hue.SetPixel(0, 0, Color.HSVToRGB((LastHSVTick = HSVTick) * .2f % 1, 1, 1));
+                    Hue.Apply();
+                }
             }
             GUI.DrawTexture(new Rect(i - PlayPos, Screen.height - Mathf.Round(Screen.height * ChunkCache[i]), 1, 1), Hue);
         }
         Destroy(Hue);
     }
-#endif
 
     void Update() {
-#if UNITY_EDITOR
-        if (Spawned)
-            Playtime += Time.deltaTime;
         if (!Spawned && Progress.Equals(ReadyText)) {
             Spawned = true;
-#else
-        if (Progress.Equals(ReadyText)) {
-#endif
             CubeDispenser NewDispenser = Instantiate(Dispenser).GetComponent<CubeDispenser>();
             NewDispenser.Boxes = Boxes;
             NewDispenser.Song = Song;
-#if !UNITY_EDITOR
-            Destroy(gameObject);
-#endif
+            if (!DebugMode)
+#pragma warning disable CS0162 // Unreachable code detected
+                Destroy(gameObject);
+#pragma warning restore CS0162 // Unreachable code detected
+        }
+        WasBox = false;
+        if (Spawned) {
+            Playtime += Time.deltaTime;
+            while (Box < Boxes.Count && Boxes[Box].Timestamp < Playtime) {
+                WasBox = true;
+                ++Box;
+            }
         }
     }
 }

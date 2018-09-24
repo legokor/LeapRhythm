@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FilePicker {
     public bool Open = false;
-    public bool OfferOpenAll = true;
+    public bool OfferOpenAll = false;
     public Rect Position;
     public List<string> FileFormats = new List<string>(new string[] { ".wav", ".ogg" });
 

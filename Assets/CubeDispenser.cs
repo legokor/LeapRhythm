@@ -6,11 +6,10 @@ public class CubeDispenser : MonoBehaviour {
     public GameObject Cube;
     public Material LeftSide;
     public Material RightSide;
-    public float Range = 10;
-    public float PathWidth = 2;
-    public float PathHeight = 1;
-    public float Speed = 3;
-    public float NewCubeIn = 1;
+    public float Range = 30;
+    public float PathWidth = .75f;
+    public float PathHeight = .75f;
+    public float Speed = 15;
     public Vector3 Size = new Vector3(.5f, .5f, .5f);
 
     public AudioClip Song;
@@ -31,8 +30,9 @@ public class CubeDispenser : MonoBehaviour {
     void Update() {
         while (Box < Boxes.Count && Boxes[Box].Timestamp < Alive) {
             GameObject NewCube = Instantiate(Cube);
-            float Width = Boxes[Box].Position.x;
-            NewCube.transform.localPosition = new Vector3(Width * PathWidth, Boxes[Box].Position.y, Range);
+            NewCube.name = Boxes[Box].Timestamp.ToString();
+            float Width = Boxes[Box].Position.x, Height = Boxes[Box].Position.y;
+            NewCube.transform.localPosition = new Vector3(Width * PathWidth, Height * PathHeight, Range);
             NewCube.transform.localScale = Size;
             NewCube.GetComponent<Renderer>().material = Width < 0 ? LeftSide : RightSide;
             Cubes.Add(NewCube);
