@@ -813,34 +813,53 @@
         <member name="T:Cavern.QuickEQ.Curves">
             <summary>EQ curve generation functions.</summary>
         </member>
-        <member name="M:Cavern.QuickEQ.Curves.GenerateLinearXCurve(System.Int32,System.Int32,System.Single)">
-            <summary>Generate a linear cinema standard reference curve (X-curve) for the correction generators.</summary>
+        <member name="M:Cavern.QuickEQ.Curves.GenerateLinearCurve(Cavern.QuickEQ.Curves.CurveFunction,System.Int32,System.Int32,System.Single)">
+            <summary>Generate a linear curve for the correction generators.</summary>
+            <param name="Function">Curve function used for generation, built-in curves are available with <see cref="M:Cavern.QuickEQ.Curves.GetCurve(Cavern.QuickEQ.Curves.CurveFunctions)"/></param>
             <param name="Length">Curve length</param>
             <param name="SampleRate">Sample rate of the measurement that the generated curve will be used for</param>
-            <param name="Gain">Level of the flat part of the curve</param>
+            <param name="Gain">Curve reference level</param>
         </member>
-        <member name="M:Cavern.QuickEQ.Curves.GenerateLogXCurve(System.Int32,System.Single,System.Single,System.Single)">
-            <summary>Generate a logarithmic cinema standard reference curve (X-curve) for the correction generators.</summary>
+        <member name="M:Cavern.QuickEQ.Curves.GenerateLogCurve(Cavern.QuickEQ.Curves.CurveFunction,System.Int32,System.Single,System.Single,System.Single)">
+            <summary>Generate a logarithmic curve for the correction generators.</summary>
+            <param name="Function">Curve function used for generation, built-in curves are available with <see cref="M:Cavern.QuickEQ.Curves.GetCurve(Cavern.QuickEQ.Curves.CurveFunctions)"/></param>
             <param name="Length">Curve length</param>
             <param name="StartFreq">Frequency at the beginning of the curve</param>
             <param name="EndFreq">Frequency at the end of the curve</param>
-            <param name="Gain">Level of the flat part of the curve</param>
+            <param name="Gain">Curve reference level</param>
         </member>
-        <member name="M:Cavern.QuickEQ.Curves.XGain(System.Single)">
-            <summary>Get the gain of the X-curve at a given frequency.</summary>
+        <member name="T:Cavern.QuickEQ.Curves.CurveFunction">
+            <summary>Function describing a target EQ curve, returning gain for each frequency.</summary>
         </member>
-        <member name="M:Cavern.QuickEQ.Curves.GenerateLinearIMAXCurve(System.Int32,System.Int32,System.Single)">
-            <summary>Generate a linear IMAX reference curve for the correction generators.</summary>
-            <param name="Length">Curve length</param>
-            <param name="SampleRate">Sample rate of the measurement that the generated curve will be used for</param>
-            <param name="Gain">Level of the flat part of the curve</param>
+        <member name="T:Cavern.QuickEQ.Curves.CurveFunctions">
+            <summary>Available built-in target curves.</summary>
         </member>
-        <member name="M:Cavern.QuickEQ.Curves.GenerateLogIMAXCurve(System.Int32,System.Single,System.Single,System.Single)">
-            <summary>Generate a logarithmic IMAX reference curve for the correction generators.</summary>
-            <param name="Length">Curve length</param>
-            <param name="StartFreq">Frequency at the beginning of the curve</param>
-            <param name="EndFreq">Frequency at the end of the curve</param>
-            <param name="Gain">Level of the flat part of the curve</param>
+        <member name="F:Cavern.QuickEQ.Curves.CurveFunctions.Flat">
+            <summary>Uniform gain on all frequencies.</summary>
+        </member>
+        <member name="F:Cavern.QuickEQ.Curves.CurveFunctions.XCurve">
+            <summary>Cinema standard curve.</summary>
+        </member>
+        <member name="F:Cavern.QuickEQ.Curves.CurveFunctions.Punch">
+            <summary>Adds a bass bump for punch emphasis.</summary>
+        </member>
+        <member name="F:Cavern.QuickEQ.Curves.CurveFunctions.Depth">
+            <summary>Adds a sub-bass slope for depth emphasis.</summary>
+        </member>
+        <member name="M:Cavern.QuickEQ.Curves.GetCurve(Cavern.QuickEQ.Curves.CurveFunctions)">
+            <summary>Get the function of built-in target curves.</summary>
+        </member>
+        <member name="M:Cavern.QuickEQ.Curves.Flat(System.Single)">
+            <summary>Uniform gain on all frequencies.</summary>
+        </member>
+        <member name="M:Cavern.QuickEQ.Curves.XCurve(System.Single)">
+            <summary>Cinema standard curve.</summary>
+        </member>
+        <member name="M:Cavern.QuickEQ.Curves.Punch(System.Single)">
+            <summary>Adds a bass bump for punch emphasis.</summary>
+        </member>
+        <member name="M:Cavern.QuickEQ.Curves.Depth(System.Single)">
+            <summary>Adds a sub-bass slope for depth emphasis.</summary>
         </member>
         <member name="T:Cavern.QuickEQ.Equalizer">
             <summary>Equalizer data collector and exporter.</summary>
@@ -1698,9 +1717,6 @@
         </member>
         <member name="P:Cavern.CavernUtilities.Info">
             <summary>Version and creator information.</summary>
-        </member>
-        <member name="F:Cavern.CavernUtilities.HalfPi">
-            <summary>pi / 2</summary>
         </member>
         <member name="F:Cavern.CavernUtilities.Sqrt2p2">
             <summary>sqrt(2) / 2</summary>
