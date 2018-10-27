@@ -52,11 +52,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Cube: {fileID: 1236461743092536, guid: 79b3eb63e6929fd4c916cd26a58c105a, type: 2}
-  LeftSide: {fileID: 2100000, guid: e0d70de288cb655478a5ffeee449a73e, type: 2}
-  RightSide: {fileID: 2100000, guid: d3e2cdd2f1449004c807e24a01d269be, type: 2}
+  CubeMat: {fileID: 2100000, guid: e0d70de288cb655478a5ffeee449a73e, type: 2}
   Range: 30
   PathWidth: 0.75
   PathHeight: 0.75
   Speed: 15
-  Size: {x: 0.5, y: 0.5, z: 0.5}
+  Size: {x: 0.3, y: 0.3, z: 0.3}
   Song: {fileID: 0}

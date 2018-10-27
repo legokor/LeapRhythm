@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using GameModes;
+using System.IO;
 using UnityEngine;
 
 public class Menu : MonoBehaviour {
@@ -15,9 +16,11 @@ public class Menu : MonoBehaviour {
     private void StartSong(FileInfo Loaded) {
         Reader = (new GameObject()).AddComponent<MapReader>();
         Reader.Dispenser = Dispenser;
+        Reader.Mode = GameModeType.Ninja; // TODO: UI
         WWW Loader = new WWW("file://" + Loaded.FullName);
         while (!Loader.isDone) ;
         Reader.Song = Loader.GetAudioClip();
+        Reader.name = Loaded.Name;
     }
 
     void OnGUI() {

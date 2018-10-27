@@ -5,9 +5,12 @@ using UnityEngine;
 
 using Random = System.Random;
 
+using GameModes;
+
 public struct BoxEntry {
     public float Timestamp;
     public Vector2 Position;
+    public Color Tint, Edge;
 }
 
 public class MapReader : MonoBehaviour {
@@ -21,6 +24,7 @@ public class MapReader : MonoBehaviour {
     public int Smoothing = 1;
     [Tooltip("Hit detection decay rate. Higher values increase difficulty.")]
     public float Decay = .05f;
+    public GameModeType Mode;
 
     [NonSerialized] public string Progress = string.Empty;
 
@@ -36,9 +40,11 @@ public class MapReader : MonoBehaviour {
     float[] ChunkCache;
     float[] Samples;
     int Channels, SampleRate, ChunkStep;
-    Random Rand = new Random();
+    string SongName;
+    Random Rand;
     Task Worker;
     List<BoxEntry> Boxes = new List<BoxEntry>();
+    GameMode ModeClass;
 
     // Debug vars
     bool Spawned = false, WasBox = false;
@@ -74,13 +80,19 @@ public class MapReader : MonoBehaviour {
     }
 
     void AddBox(float Timestamp, Vector2 Position) {
-        Boxes.Add(new BoxEntry() {
+        BoxEntry NewEntry = new BoxEntry() {
             Timestamp = Timestamp,
             Position = Position
-        });
+        };
+        ModeClass.PaintBox(ref NewEntry);
+        Boxes.Add(NewEntry);
     }
 
     void Loader() {
+        int Seed = 0;
+        for (int i = 0, c = SongName.Length; i < c; ++i)
+            Seed += SongName[i];
+        Rand = new Random(Seed);
         ChunkFrequency = SampleRate * Subchunks / (float)ChunkSize;
         ChunkCache = Smooth(GetChunkRMS());
         int LastRMSBox = 0;
@@ -93,10 +105,13 @@ public class MapReader : MonoBehaviour {
                 float PunchDelta = Punch * ToSeconds;
                 if (PunchDelta > .1f) {
                     float Timestamp = Chunk * ChunkStep / (float)SampleRate;
-                    // TODO: don't spawn in the middle
                     Vector2 BoxPos = new Vector2((float)Rand.NextDouble() * 2 - 1, (float)Rand.NextDouble() * 2 - 1);
+                    if (PunchDelta > .5f) {
+                        BoxPos.x = BoxPos.x * .75f + Mathf.Sign(BoxPos.x) * .25f;
+                        BoxPos.y = BoxPos.y * .75f + Mathf.Sign(BoxPos.y) * .25f;
+                        AddBox(Timestamp, new Vector2(-BoxPos.x, Rand.NextDouble() > .25 ? BoxPos.y : -BoxPos.y));
+                    }
                     AddBox(Timestamp, BoxPos);
-                    if (PunchDelta > .5f) AddBox(Timestamp, new Vector2(-BoxPos.x, Rand.NextDouble() > .25 ? BoxPos.y : -BoxPos.y));
                 }
             }
         }
@@ -108,7 +123,16 @@ public class MapReader : MonoBehaviour {
         Channels = Song.channels;
         Samples = new float[Song.samples * Channels];
         Song.GetData(Samples, 0);
-        SampleRate = Song.frequency * Channels; // TODO: handle channels properly
+        SongName = Song.name;
+        SampleRate = Song.frequency * Channels;
+        switch (Mode) {
+            case GameModeType.Ninja:
+                ModeClass = new Ninja();
+                break;
+            default:
+                ModeClass = new FreeForAll();
+                break;
+        }
         Worker = new Task(Loader);
         Worker.Start();
     }

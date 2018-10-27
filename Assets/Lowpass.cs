@@ -2,7 +2,7 @@
 
 /// <summary>Simple first-order lowpass filter from Cavern.</summary>
 internal class Lowpass {
-    float a1, a2, b1, b2; // Transfer function
+    private readonly float a1, a2, b1, b2;
     float x1, x2, y1, y2; // History
 
     public Lowpass(int SampleRate, float CenterFreq, float Q = .7071067811865475f) {

@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class CubeDispenser : MonoBehaviour {
     public GameObject Cube;
-    public Material LeftSide;
-    public Material RightSide;
+    public Material CubeMat;
     public float Range = 30;
     public float PathWidth = .75f;
     public float PathHeight = .75f;
     public float Speed = 15;
-    public Vector3 Size = new Vector3(.5f, .5f, .5f);
+    public Vector3 Size = new Vector3(.3f, .3f, .3f);
 
     public AudioClip Song;
     public List<BoxEntry> Boxes;
@@ -24,7 +23,9 @@ public class CubeDispenser : MonoBehaviour {
         Alive = Range / Speed;
         while (Box < Boxes.Count && Boxes[Box].Timestamp < Alive)
             ++Box;
-        gameObject.AddComponent<AudioSource3D>().clip = Song;
+        AudioSource3D Source = gameObject.AddComponent<AudioSource3D>();
+        Source.clip = Song;
+        Source.SpatialBlend = 0;
     }
 
     void Update() {
@@ -34,7 +35,10 @@ public class CubeDispenser : MonoBehaviour {
             float Width = Boxes[Box].Position.x, Height = Boxes[Box].Position.y;
             NewCube.transform.localPosition = new Vector3(Width * PathWidth, Height * PathHeight, Range);
             NewCube.transform.localScale = Size;
-            NewCube.GetComponent<Renderer>().material = Width < 0 ? LeftSide : RightSide;
+            Material NewMat = new Material(CubeMat);
+            NewMat.SetColor("_Color", Boxes[Box].Tint);
+            NewMat.SetColor("_Edge", Boxes[Box].Edge);
+            NewCube.GetComponent<Renderer>().material = NewMat;
             Cubes.Add(NewCube);
             ++Box;
         }
@@ -48,7 +52,10 @@ public class CubeDispenser : MonoBehaviour {
         while (Destroyables.Count != 0) {
             GameObject Target = Destroyables.Dequeue();
             Cubes.Remove(Target);
-            Destroy(Target);
+            if (Target) {
+                Destroy(Target.GetComponent<Renderer>().material);
+                Destroy(Target);
+            }
         }
         Alive += Time.deltaTime;
     }
