@@ -5,6 +5,8 @@ using UnityEngine;
 
 using Random = System.Random;
 
+using Cavern;
+
 using GameModes;
 
 public struct BoxEntry {
@@ -28,8 +30,6 @@ public class MapReader : MonoBehaviour {
 
     [NonSerialized] public string Progress = string.Empty;
 
-    const string ReadyText = "Ready";
-
     /// <summary>
     /// Chunks per second.
     /// </summary>
@@ -48,8 +48,8 @@ public class MapReader : MonoBehaviour {
 
     // Debug vars
     bool Spawned = false, WasBox = false;
+    CubeDispenser DispenserInstancce;
     int Box = 0;
-    float Playtime = 0;
 
     float[] GetChunkRMS() {
         Progress = "Preparing chunk division";
@@ -96,14 +96,14 @@ public class MapReader : MonoBehaviour {
         ChunkFrequency = SampleRate * Subchunks / (float)ChunkSize;
         ChunkCache = Smooth(GetChunkRMS());
         int LastRMSBox = 0;
-        float ToSeconds = ChunkStep / (float)SampleRate;
+        float ToSeconds = ChunkStep / (float)SampleRate, MinPunchDelta = ModeClass.MinPunchDelta;
         for (int Chunk = 1, End = ChunkCache.Length - 1; Chunk < End; ++Chunk) {
             ChunkCache[Chunk + 1] = Mathf.Max(ChunkCache[Chunk] - Decay / ChunkFrequency, ChunkCache[Chunk + 1]); // Smoothing
             if (ChunkCache[Chunk] > ChunkCache[Chunk - 1] && ChunkCache[Chunk] > ChunkCache[Chunk + 1]) {
                 int Punch = Chunk - LastRMSBox;
                 LastRMSBox = Chunk;
                 float PunchDelta = Punch * ToSeconds;
-                if (PunchDelta > .1f) {
+                if (PunchDelta > MinPunchDelta) {
                     float Timestamp = Chunk * ChunkStep / (float)SampleRate;
                     Vector2 BoxPos = new Vector2((float)Rand.NextDouble() * 2 - 1, (float)Rand.NextDouble() * 2 - 1);
                     if (PunchDelta > .5f) {
@@ -115,7 +115,7 @@ public class MapReader : MonoBehaviour {
                 }
             }
         }
-        Progress = ReadyText;
+        Progress = string.Empty;
     }
 
     void Start() {
@@ -146,6 +146,7 @@ public class MapReader : MonoBehaviour {
             Hue.SetPixel(1, 1, Color.white);
             Hue.Apply();
         }
+        float Playtime = DispenserInstancce.GetComponent<AudioSource3D>().time;
         int PlayPos = Mathf.RoundToInt(Playtime * ChunkFrequency);
         for (int i = PlayPos, e = Math.Min(ChunkCache.Length, PlayPos + 250); i < e; ++i) {
             if (!WasBox) {
@@ -158,26 +159,24 @@ public class MapReader : MonoBehaviour {
             GUI.DrawTexture(new Rect(i - PlayPos, Screen.height - Mathf.Round(Screen.height * ChunkCache[i]), 1, 1), Hue);
         }
         Destroy(Hue);
+        GUI.Label(new Rect(0, 0, 200, 25), Playtime.ToString());
+        WasBox = false;
+        while (Box < Boxes.Count && Boxes[Box].Timestamp < Playtime) {
+            WasBox = true;
+            ++Box;
+        }
     }
 
     void Update() {
-        if (!Spawned && Progress.Equals(ReadyText)) {
+        if (!Spawned && Progress.Length == 0) {
             Spawned = true;
-            CubeDispenser NewDispenser = Instantiate(Dispenser).GetComponent<CubeDispenser>();
-            NewDispenser.Boxes = Boxes;
-            NewDispenser.Song = Song;
+            DispenserInstancce = Instantiate(Dispenser).GetComponent<CubeDispenser>();
+            DispenserInstancce.Boxes = Boxes;
+            DispenserInstancce.Song = Song;
             if (!DebugMode)
 #pragma warning disable CS0162 // Unreachable code detected
                 Destroy(gameObject);
 #pragma warning restore CS0162 // Unreachable code detected
-        }
-        WasBox = false;
-        if (Spawned) {
-            Playtime += Time.deltaTime;
-            while (Box < Boxes.Count && Boxes[Box].Timestamp < Playtime) {
-                WasBox = true;
-                ++Box;
-            }
         }
     }
 }

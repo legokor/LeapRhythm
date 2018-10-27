@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
-using Random = System.Random;
-
 namespace GameModes {
     public class Ninja : GameMode {
+        public override float MinPunchDelta { get { return .02f; } }
+
         public override void PaintBox(ref BoxEntry Box) {
             if (Mathf.Abs(Box.Position.x * Box.Position.y) < .2f) {
                 float Hue = Box.Timestamp % 1;

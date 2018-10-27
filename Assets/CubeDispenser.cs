@@ -6,6 +6,8 @@ public class CubeDispenser : MonoBehaviour {
     public GameObject Cube;
     public Material CubeMat;
     public float Range = 30;
+    [Tooltip("Additional units to travel by uncut cubes before disappearing.")]
+    public float Overrun = 10;
     public float PathWidth = .75f;
     public float PathHeight = .75f;
     public float Speed = 15;
@@ -14,6 +16,7 @@ public class CubeDispenser : MonoBehaviour {
     public AudioClip Song;
     public List<BoxEntry> Boxes;
 
+    AudioSource3D Source;
     float Alive = 0;
     int Box = 0;
     List<GameObject> Cubes = new List<GameObject>();
@@ -23,17 +26,18 @@ public class CubeDispenser : MonoBehaviour {
         Alive = Range / Speed;
         while (Box < Boxes.Count && Boxes[Box].Timestamp < Alive)
             ++Box;
-        AudioSource3D Source = gameObject.AddComponent<AudioSource3D>();
+        Source = gameObject.AddComponent<AudioSource3D>();
         Source.clip = Song;
         Source.SpatialBlend = 0;
     }
 
     void Update() {
-        while (Box < Boxes.Count && Boxes[Box].Timestamp < Alive) {
-            GameObject NewCube = Instantiate(Cube);
+        Alive = Source.time + Range / Speed;
+        while (Box < Boxes.Count && Boxes[Box].Timestamp <= Alive) {
+            GameObject NewCube = Instantiate(Cube, transform);
             NewCube.name = Boxes[Box].Timestamp.ToString();
             float Width = Boxes[Box].Position.x, Height = Boxes[Box].Position.y;
-            NewCube.transform.localPosition = new Vector3(Width * PathWidth, Height * PathHeight, Range);
+            NewCube.transform.localPosition = new Vector3(Width * PathWidth, Height * PathHeight, 0);
             NewCube.transform.localScale = Size;
             Material NewMat = new Material(CubeMat);
             NewMat.SetColor("_Color", Boxes[Box].Tint);
@@ -44,10 +48,13 @@ public class CubeDispenser : MonoBehaviour {
         }
         float Direction = -Speed * Time.deltaTime;
         foreach (GameObject MovingCube in Cubes) {
-            if (!MovingCube || MovingCube.transform.localPosition.z < 0)
+            if (!MovingCube || MovingCube.transform.localPosition.z < -Overrun)
                 Destroyables.Enqueue(MovingCube);
-            else
-                MovingCube.transform.Translate(0, 0, Direction, Space.Self);
+            else {
+                Vector3 CurrentPos = MovingCube.transform.localPosition;
+                float Distance = (float.Parse(MovingCube.name) - Alive) * Speed + Range;
+                MovingCube.transform.localPosition = new Vector3(CurrentPos.x, CurrentPos.y, Distance);
+            }
         }
         while (Destroyables.Count != 0) {
             GameObject Target = Destroyables.Dequeue();
@@ -57,6 +64,5 @@ public class CubeDispenser : MonoBehaviour {
                 Destroy(Target);
             }
         }
-        Alive += Time.deltaTime;
     }
 }
