@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public struct BoxEntry {
+    public float Timestamp;
+    public Vector2 Position;
+    public Color Tint, Edge;
+}
+
 public class CubeDispenser : MonoBehaviour {
     public GameObject Cube;
     public Material CubeMat;
@@ -46,7 +52,6 @@ public class CubeDispenser : MonoBehaviour {
             Cubes.Add(NewCube);
             ++Box;
         }
-        float Direction = -Speed * Time.deltaTime;
         foreach (GameObject MovingCube in Cubes) {
             if (!MovingCube || MovingCube.transform.localPosition.z < -Overrun)
                 Destroyables.Enqueue(MovingCube);
