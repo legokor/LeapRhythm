@@ -152,7 +152,7 @@ namespace AudioProcessor {
                 GUI.DrawTexture(new Rect(i - PlayPos, Screen.height - Mathf.Round(Screen.height * ChunkCache[i]), 1, 1), Hue);
             }
             Destroy(Hue);
-            GUI.Label(new Rect(0, 0, 200, 25), Playtime.ToString());
+            GUI.Label(new Rect(0, 0, 200, 25), "Playtime: " + Playtime);
             WasBox = false;
             while (Box < Boxes.Count && Boxes[Box].Timestamp < Playtime) {
                 WasBox = true;
