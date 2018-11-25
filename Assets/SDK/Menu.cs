@@ -4,6 +4,7 @@ using System.IO;
 using UnityEngine;
 
 public class Menu : MonoBehaviour {
+    public GameObject Collector;
     public GameObject Dispenser;
 
     FilePicker Picker = new FilePicker();
@@ -16,6 +17,7 @@ public class Menu : MonoBehaviour {
 
     private void StartSong(FileInfo Loaded) {
         Reader = (new GameObject()).AddComponent<MapReader>();
+        Reader.Collector = Collector;
         Reader.Dispenser = Dispenser;
         Reader.Mode = GameModeType.Ninja; // TODO: UI
         WWW Loader = new WWW("file://" + Loaded.FullName);

@@ -12,6 +12,7 @@ namespace AudioProcessor {
         const bool DebugMode = true;
 
         public AudioClip Song;
+        public GameObject Collector;
         public GameObject Dispenser;
         public int ChunkSize = 16384;
         public int Subchunks = 4;
@@ -39,9 +40,11 @@ namespace AudioProcessor {
         List<BoxEntry> Boxes = new List<BoxEntry>();
         GameMode ModeClass;
 
+        static ScoreCollector CollectorInstance;
+        static CubeDispenser DispenserInstancce;
+
         // Debug vars
         bool Spawned = false, WasBox = false;
-        CubeDispenser DispenserInstancce;
         int Box = 0;
 
         float[] GetChunkRMS() {
@@ -163,6 +166,9 @@ namespace AudioProcessor {
         void Update() {
             if (!Spawned && Progress.Length == 0) {
                 Spawned = true;
+                if (CollectorInstance) Destroy(CollectorInstance.gameObject);
+                if (DispenserInstancce) Destroy(DispenserInstancce.gameObject);
+                CollectorInstance = Instantiate(Collector).GetComponent<ScoreCollector>();
                 DispenserInstancce = Instantiate(Dispenser).GetComponent<CubeDispenser>();
                 DispenserInstancce.Boxes = Boxes;
                 DispenserInstancce.Song = Song;

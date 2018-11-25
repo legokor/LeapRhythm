@@ -54,6 +54,7 @@ MonoBehaviour:
   Cube: {fileID: 1236461743092536, guid: 79b3eb63e6929fd4c916cd26a58c105a, type: 2}
   CubeMat: {fileID: 2100000, guid: e0d70de288cb655478a5ffeee449a73e, type: 2}
   Range: 30
+  Overrun: 10
   PathWidth: 0.75
   PathHeight: 0.75
   Speed: 15

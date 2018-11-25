@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 198025923746423606}
   - component: {fileID: 199783454883915338}
   m_Layer: 0
-  m_Name: Side particles
+  m_Name: Side Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

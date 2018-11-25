@@ -2,6 +2,7 @@
 
 public class Target : MonoBehaviour {
     public void OnHit() {
-        Destroy(gameObject);
+        if (ScoreCollector.Instance)
+            ScoreCollector.Instance.OnHit(this);
     }
 }
