@@ -5,7 +5,7 @@ namespace GameModes {
         public override float MinPunchDelta { get { return .02f; } }
 
         public override void PaintBox(ref BoxEntry Box) {
-            if (Mathf.Abs(Box.Position.x * Box.Position.y) < .2f) {
+            if (Mathf.Abs(Box.Position.x * Box.Position.y) < .35f) {
                 float Hue = Box.Timestamp % 1;
                 Box.Tint = Color.HSVToRGB(Hue, 1, 1);
                 Box.Edge = Color.HSVToRGB(Hue, 1, .5f);

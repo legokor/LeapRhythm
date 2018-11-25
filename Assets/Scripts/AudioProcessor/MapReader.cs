@@ -92,11 +92,11 @@ namespace AudioProcessor {
             ChunkFrequency = SampleRate * Subchunks / (float)ChunkSize;
             ChunkCache = Smooth(GetChunkRMS());
             int LastRMSBox = 0;
-            float ToSeconds = ChunkStep / (float)SampleRate, MinPunchDelta = ModeClass.MinPunchDelta;
+            float ToSeconds = ChunkStep / (float)SampleRate, MinPunchDelta = ModeClass.MinPunchDelta, DecayPerBlock = Decay / ChunkFrequency;
             for (int Chunk = 1, End = ChunkCache.Length - 1; Chunk < End; ++Chunk) {
-                ChunkCache[Chunk + 1] = Mathf.Max(ChunkCache[Chunk] - Decay / ChunkFrequency, ChunkCache[Chunk + 1]); // Smoothing
+                int Punch = Chunk - LastRMSBox;
+                ChunkCache[Chunk + 1] = Mathf.Max(ChunkCache[Chunk] - DecayPerBlock * Punch, ChunkCache[Chunk + 1]); // Smoothing
                 if (ChunkCache[Chunk] > ChunkCache[Chunk - 1] && ChunkCache[Chunk] > ChunkCache[Chunk + 1]) {
-                    int Punch = Chunk - LastRMSBox;
                     LastRMSBox = Chunk;
                     float PunchDelta = Punch * ToSeconds;
                     if (PunchDelta > MinPunchDelta) {
