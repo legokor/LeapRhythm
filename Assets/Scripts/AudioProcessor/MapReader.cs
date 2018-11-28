@@ -41,7 +41,14 @@ namespace AudioProcessor {
         GameMode ModeClass;
 
         static ScoreCollector CollectorInstance;
-        static CubeDispenser DispenserInstancce;
+        static CubeDispenser DispenserInstance;
+
+        public static void DestroyMap() {
+            if (CollectorInstance)
+                Destroy(CollectorInstance.gameObject);
+            if (DispenserInstance)
+                Destroy(DispenserInstance.gameObject);
+        }
 
         // Debug vars
         bool Spawned = false, WasBox = false;
@@ -142,7 +149,7 @@ namespace AudioProcessor {
                 Hue.SetPixel(1, 1, Color.white);
                 Hue.Apply();
             }
-            float Playtime = DispenserInstancce.GetComponent<AudioSource3D>().time;
+            float Playtime = DispenserInstance.GetComponent<AudioSource3D>().time;
             int PlayPos = Mathf.RoundToInt(Playtime * ChunkFrequency);
             for (int i = PlayPos, e = Math.Min(ChunkCache.Length, PlayPos + 250); i < e; ++i) {
                 if (!WasBox) {
@@ -167,11 +174,11 @@ namespace AudioProcessor {
             if (!Spawned && Progress.Length == 0) {
                 Spawned = true;
                 if (CollectorInstance) Destroy(CollectorInstance.gameObject);
-                if (DispenserInstancce) Destroy(DispenserInstancce.gameObject);
+                if (DispenserInstance) Destroy(DispenserInstance.gameObject);
                 CollectorInstance = Instantiate(Collector).GetComponent<ScoreCollector>();
-                DispenserInstancce = Instantiate(Dispenser).GetComponent<CubeDispenser>();
-                DispenserInstancce.Boxes = Boxes;
-                DispenserInstancce.Song = Song;
+                DispenserInstance = Instantiate(Dispenser).GetComponent<CubeDispenser>();
+                DispenserInstance.Boxes = Boxes;
+                DispenserInstance.Song = Song;
                 if (!DebugMode)
 #pragma warning disable CS0162 // Unreachable code detected
                     Destroy(gameObject);
