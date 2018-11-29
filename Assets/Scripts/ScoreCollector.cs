@@ -1,9 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using UI;
 
 public class ScoreCollector : MonoBehaviour {
     public static ScoreCollector Instance;
+
+    public GameObject ScoreAddition;
+    public Text ScoreDisplay;
 
     public int LaneCount = 1;
     public Image[] LaneElements;
@@ -13,24 +17,18 @@ public class ScoreCollector : MonoBehaviour {
 
     public float DecayMultiplier = 0.15f;
 
-    [NonSerialized] public bool GameOver;
     [NonSerialized] public int Score;
-
-    public delegate void GameOverDelegate();
-    public event GameOverDelegate OnGameOver;
-
-    public delegate void ScoreDelegate(int ScoreGain);
-    public event ScoreDelegate OnScore;
 
     int ElemsPerLane;
     int Combo = 1;
 
     void Start() {
+        ScoreDisplay.transform.parent.SetParent(null); // Connected for single prefab, needs to be disconnected for Canvas display
+        ScoreDisplay.text = "0";
         if (Instance)
             Destroy(Instance);
         Instance = this;
         ElemsPerLane = LaneElements.Length / LaneCount;
-        OnScore += AddScore;
     }
 
     void FixedUpdate() {
@@ -52,6 +50,11 @@ public class ScoreCollector : MonoBehaviour {
         }
     }
 
+    void OnDestroy() {
+        if (ScoreDisplay)
+            Destroy(ScoreDisplay.transform.parent.gameObject);
+    }
+
     public void OnHit(Target Hit) {
         int Lane = Hit.transform.position.x < 0 ? 0 : 1;
         Color TargetColor = Hit.GetComponent<Renderer>().material.color;
@@ -59,7 +62,18 @@ public class ScoreCollector : MonoBehaviour {
         Destroy(Hit);
     }
 
-    void AddScore(int ScoreGain) => Score += ScoreGain;
+    void GameOver() {
+        Debug.Log("Game over"); // TODO: jazz music stops
+    }
+
+    void AddScore(int ScoreGain) {
+        Score += ScoreGain;
+        ScoreDisplay.text = Score.ToString();
+        GameObject Addition = Instantiate(ScoreAddition);
+        Addition.transform.SetParent(ScoreDisplay.transform.parent, false);
+        Addition.GetComponent<ScoreAdditionDisplay>().Score = ScoreGain;
+    }
+
     void SetElement(int Lane, int Element, Color Tint) => LaneElements[ElemsPerLane * Lane + Element].color = Tint;
     void ClearElement(int Lane, int Element) => SetElement(Lane, Element, new Color(1, 1, 1, 1));
     Color GetElement(int Lane, int Element) => LaneElements[ElemsPerLane * Lane + Element].color;
@@ -74,27 +88,28 @@ public class ScoreCollector : MonoBehaviour {
     }
 
     void AddToLane(int Lane, Color Tint) {
-        for (int i = 0; i < ElemsPerLane; ++i) {
-            if (IsWhite(Lane, i)) {
-                if (i + 1 == ElemsPerLane) {
-                    if (Tint.r == Tint.g && Tint.r == Tint.b) {
-                        GameOver = true;
-                        OnGameOver?.Invoke();
-                    } else {
-                        int Wiped = 0;
-                        for (int j = i; j >= 0; --j) {
-                            if (IsGreyscale(Lane, j))
-                                break;
-                            ++Wiped;
-                            ClearElement(Lane, i = j);
-                        }
-                        if (Wiped > 0)
-                            OnScore?.Invoke(Wiped * 25);
+        for (int i = 0; i <= ElemsPerLane; ++i) {
+            if (i == ElemsPerLane) {
+                if ((Tint.r == Tint.g && Tint.r == Tint.b) || IsGreyscale(Lane, i - 1))
+                    GameOver();
+                else {
+                    int Wiped = 0;
+                    for (int j = i - 1; j >= 0; --j) {
+                        if (IsGreyscale(Lane, j))
+                            break;
+                        ++Wiped;
+                        ClearElement(Lane, i = j);
                     }
+                    if (Wiped == 0)
+                        GameOver();
+                    else
+                        AddScore(Wiped * 25);
                 }
+            }
+            if (i != ElemsPerLane && IsWhite(Lane, i)) {
                 SetElement(Lane, i, Tint);
-                OnScore?.Invoke(Combo);
-                Combo = Math.Max(Combo + ComboStep, MaxCombo);
+                AddScore(Combo);
+                Combo = Math.Min(Combo + ComboStep, MaxCombo);
                 return;
             }
         }

@@ -549,6 +549,7 @@ GameObject:
   - component: {fileID: 472585701}
   - component: {fileID: 472585700}
   - component: {fileID: 472585704}
+  - component: {fileID: 472585705}
   m_Layer: 5
   m_Name: Menu
   m_TagString: Untagged
@@ -651,6 +652,21 @@ MonoBehaviour:
   Collector: {fileID: 1048958392365052, guid: 20db44d28276791498bf4451bbdfcdbe, type: 2}
   Dispenser: {fileID: 1112507129727854, guid: 35912f8cbb7f6064a9068159d32817f7, type: 2}
   FFATicker: {fileID: 797550155}
+--- !u!114 &472585705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 472585699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3aaa027bec9a96c41bcf7be1719adedf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MouseIcon: {fileID: 10912, guid: 0000000000000000f000000000000000, type: 0}
+  OffHandIcon: {fileID: 10904, guid: 0000000000000000f000000000000000, type: 0}
+  MouseSize: {x: 64, y: 64}
+  CenterPointer: 1
 --- !u!1 &538037679
 GameObject:
   m_ObjectHideFlags: 0
