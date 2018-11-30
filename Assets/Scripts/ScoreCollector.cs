@@ -7,7 +7,7 @@ public class ScoreCollector : MonoBehaviour {
     public static ScoreCollector Instance;
 
     public GameObject ScoreAddition;
-    public Text ScoreDisplay;
+    public Text ScoreDisplay, GameOverScore;
 
     public int LaneCount = 1;
     public Image[] LaneElements;
@@ -59,11 +59,14 @@ public class ScoreCollector : MonoBehaviour {
         int Lane = Hit.transform.position.x < 0 ? 0 : 1;
         Color TargetColor = Hit.GetComponent<Renderer>().material.color;
         AddToLane(Lane, TargetColor);
-        Destroy(Hit);
+        Destroy(Hit.gameObject);
     }
 
     void GameOver() {
-        Debug.Log("Game over"); // TODO: jazz music stops
+        if (!Menu.Instance.GameOverUI.activeSelf) {
+            Menu.Instance.GameOverUI.SetActive(true);
+            Menu.Instance.GameOverScore.text = Score.ToString();
+        }
     }
 
     void AddScore(int ScoreGain) {

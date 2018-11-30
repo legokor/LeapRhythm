@@ -12,8 +12,6 @@ namespace AudioProcessor {
         const bool DebugMode = true;
 
         public AudioClip Song;
-        public GameObject Collector;
-        public GameObject Dispenser;
         public int ChunkSize = 16384;
         public int Subchunks = 4;
         [Tooltip("Smoothed samples in each direction. Should only be >1 on very intense tracks.")]
@@ -141,7 +139,7 @@ namespace AudioProcessor {
         }
 
         void OnGUI() {
-            if (ChunkCache == null)
+            if (ChunkCache == null || !DispenserInstance)
                 return;
             Texture2D Hue = new Texture2D(1, 1);
             int LastHSVTick = -1;
@@ -175,8 +173,8 @@ namespace AudioProcessor {
                 Spawned = true;
                 if (CollectorInstance) Destroy(CollectorInstance.gameObject);
                 if (DispenserInstance) Destroy(DispenserInstance.gameObject);
-                CollectorInstance = Instantiate(Collector).GetComponent<ScoreCollector>();
-                DispenserInstance = Instantiate(Dispenser).GetComponent<CubeDispenser>();
+                CollectorInstance = Instantiate(Menu.Instance.Collector).GetComponent<ScoreCollector>();
+                DispenserInstance = Instantiate(Menu.Instance.Dispenser).GetComponent<CubeDispenser>();
                 DispenserInstance.Boxes = Boxes;
                 DispenserInstance.Song = Song;
                 if (!DebugMode)
@@ -184,6 +182,8 @@ namespace AudioProcessor {
                     Destroy(gameObject);
 #pragma warning restore CS0162 // Unreachable code detected
             }
+            if (!DispenserInstance)
+                Destroy(gameObject);
         }
     }
 }

@@ -1,12 +1,15 @@
 ﻿using AudioProcessor;
 using GameModes;
+using LeapVR;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Canvas))]
+[RequireComponent(typeof(Canvas), typeof(LeapMouse))]
 public class Menu : MonoBehaviour {
+    public static Menu Instance;
+
     public Transform MenuPosition;
     public Transform IngamePosition;
 
@@ -15,16 +18,24 @@ public class Menu : MonoBehaviour {
     [Tooltip("The tick for Free For All mode which must be ticked initially. Others are detected automatically.")]
     public Toggle FFATicker;
 
+    public GameObject GameOverUI;
+    public Text GameOverScore;
+
     GameModeType GameMode = GameModeType.FreeForAll;
 
     Canvas MenuCanvas;
+    LeapMouse Mouse;
     FilePicker Picker = new FilePicker();
     MapReader Reader;
 
     Dictionary<GameModeType, Toggle> ModeSwitchers = new Dictionary<GameModeType, Toggle>();
 
     void Start() {
+        if (Instance)
+            Destroy(Instance);
+        Instance = this;
         MenuCanvas = GetComponent<Canvas>();
+        Mouse = GetComponent<LeapMouse>();
         Picker.Folder = PlayerPrefs.GetString("Folder", "\\");
         Picker.OnFileLoaded += StartSong;
         ModeSwitchers.Add(GameModeType.FreeForAll, FFATicker);
@@ -48,12 +59,11 @@ public class Menu : MonoBehaviour {
 
     public void SetMenuVisibility(bool Target) {
         MenuCanvas.enabled = Target;
+        Mouse.enabled = Target;
     }
 
     void StartSong(FileInfo Loaded) {
         Reader = (new GameObject()).AddComponent<MapReader>();
-        Reader.Collector = Collector;
-        Reader.Dispenser = Dispenser;
         Reader.Mode = GameMode;
         WWW Loader = new WWW("file://" + Loaded.FullName);
         while (!Loader.isDone) ;
@@ -62,10 +72,9 @@ public class Menu : MonoBehaviour {
         Reader.name = Loaded.Name.Substring(0, LastDot);
     }
 
-    void EndSong() {
+    public void EndSong() {
         MapReader.DestroyMap();
-        if (Reader)
-            Destroy(Reader.gameObject);
+        GameOverUI.SetActive(false);
     }
 
     void OnGUI() {
