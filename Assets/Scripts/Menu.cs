@@ -77,6 +77,10 @@ public class Menu : MonoBehaviour {
         GameOverUI.SetActive(false);
     }
 
+    public void SetVR(bool State) {
+        SBS.Enabled = State;
+    }
+
     void OnGUI() {
         if (Reader) {
             GUI.Label(new Rect(0, 0, Screen.width, Screen.height), Reader.Progress);
