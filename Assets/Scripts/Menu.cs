@@ -81,6 +81,10 @@ public class Menu : MonoBehaviour {
         SBS.Enabled = State;
     }
 
+    public void Exit() {
+        Application.Quit();
+    }
+
     void OnGUI() {
         if (Reader) {
             GUI.Label(new Rect(0, 0, Screen.width, Screen.height), Reader.Progress);
