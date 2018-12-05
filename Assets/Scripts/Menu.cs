@@ -24,6 +24,7 @@ public class Menu : MonoBehaviour {
     GameModeType GameMode = GameModeType.FreeForAll;
 
     Canvas MenuCanvas;
+    FileInfo LastSong;
     LeapMouse Mouse;
     FilePicker Picker = new FilePicker();
     MapReader Reader;
@@ -63,6 +64,7 @@ public class Menu : MonoBehaviour {
     }
 
     void StartSong(FileInfo Loaded) {
+        LastSong = Loaded;
         Reader = (new GameObject()).AddComponent<MapReader>();
         Reader.Mode = GameMode;
         WWW Loader = new WWW("file://" + Loaded.FullName);
@@ -70,6 +72,15 @@ public class Menu : MonoBehaviour {
         Reader.Song = Loader.GetAudioClip();
         int LastDot = Loaded.Name.LastIndexOf('.');
         Reader.name = Loaded.Name.Substring(0, LastDot);
+    }
+
+    public void GameOver() {
+        ScoreCollector.Instance.GameOver();
+    }
+
+    public void RestartSong() {
+        EndSong();
+        StartSong(LastSong);
     }
 
     public void EndSong() {
@@ -94,16 +105,19 @@ public class Menu : MonoBehaviour {
     }
 
     void Update() {
-        if (ScoreCollector.Instance)
+        if (GameOverUI.activeSelf) {
+            if (!Mouse.enabled)
+                Mouse.enabled = true;
+        } else if (ScoreCollector.Instance) {
             SetMenuVisibility(false);
-        else if (MenuCanvas.enabled == Picker.Open)
+            if (Input.GetKeyDown(KeyCode.Escape))
+                GameOver();
+        } else if (MenuCanvas.enabled == Picker.Open)
             SetMenuVisibility(!Picker.Open);
         Transform Cam = Camera.main.transform;
         float Timing = Time.deltaTime * 5;
         Cam.position = Vector3.Lerp(Cam.position, ScoreCollector.Instance ? IngamePosition.position : MenuPosition.position, Timing);
         Cam.rotation = Quaternion.Lerp(Cam.rotation, ScoreCollector.Instance ? IngamePosition.rotation : MenuPosition.rotation, Timing);
-        if (Input.GetKeyDown(KeyCode.Escape)) // TODO: pause menu
-            EndSong();
     }
 
     void OnDestroy() {

@@ -9,7 +9,7 @@ using Random = System.Random;
 
 namespace AudioProcessor {
     public class MapReader : MonoBehaviour {
-        const bool DebugMode = true;
+        const bool DebugMode = false;
 
         public AudioClip Song;
         public int ChunkSize = 16384;
@@ -20,8 +20,9 @@ namespace AudioProcessor {
         public float Decay = .05f;
         public GameModeType Mode;
 
-        [NonSerialized] public string Progress = string.Empty;
+        [NonSerialized] public string Progress;
 
+        bool ReadyToPlay;
         /// <summary>
         /// Chunks per second.
         /// </summary>
@@ -116,7 +117,7 @@ namespace AudioProcessor {
                     }
                 }
             }
-            Progress = string.Empty;
+            ReadyToPlay = true;
         }
 
         void Start() {
@@ -169,7 +170,7 @@ namespace AudioProcessor {
         }
 
         void Update() {
-            if (!Spawned && Progress.Length == 0) {
+            if (!Spawned && ReadyToPlay) {
                 Spawned = true;
                 if (CollectorInstance) Destroy(CollectorInstance.gameObject);
                 if (DispenserInstance) Destroy(DispenserInstance.gameObject);
@@ -177,12 +178,13 @@ namespace AudioProcessor {
                 DispenserInstance = Instantiate(Menu.Instance.Dispenser).GetComponent<CubeDispenser>();
                 DispenserInstance.Boxes = Boxes;
                 DispenserInstance.Song = Song;
+                DispenserInstance.OnSongEnd += CollectorInstance.GameOver;
                 if (!DebugMode)
 #pragma warning disable CS0162 // Unreachable code detected
                     Destroy(gameObject);
 #pragma warning restore CS0162 // Unreachable code detected
             }
-            if (!DispenserInstance)
+            if (Spawned && !DispenserInstance)
                 Destroy(gameObject);
         }
     }

@@ -23,10 +23,14 @@ public class CubeDispenser : MonoBehaviour {
     public List<BoxEntry> Boxes;
 
     AudioSource3D Source;
+    bool PlayState = true;
     float Alive = 0;
     int Box = 0;
     List<GameObject> Cubes = new List<GameObject>();
     Queue<GameObject> Destroyables = new Queue<GameObject>();
+
+    public delegate void SongEnd();
+    public event SongEnd OnSongEnd;
 
     void Start() {
         Alive = Range / Speed;
@@ -69,5 +73,13 @@ public class CubeDispenser : MonoBehaviour {
                 Destroy(Target);
             }
         }
+        if (PlayState != Source.IsPlaying) {
+            PlayState = Source.IsPlaying;
+            OnSongEnd?.Invoke();
+        }
+    }
+
+    void OnDestroy() {
+        Destroy(Song);
     }
 }

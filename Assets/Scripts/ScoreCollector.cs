@@ -32,6 +32,7 @@ public class ScoreCollector : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        ScoreDisplay.enabled = !Menu.Instance.GameOverUI.activeSelf;
         // TODO: decay (colors lighten, if a block is moved, reset decay)
         float DecayRate = Time.fixedDeltaTime * DecayMultiplier;
         for (int i = 0, c = LaneElements.Length; i < c; ++i) {
@@ -56,13 +57,15 @@ public class ScoreCollector : MonoBehaviour {
     }
 
     public void OnHit(Target Hit) {
+        if (Menu.Instance.GameOverUI.activeSelf)
+            return;
         int Lane = Hit.transform.position.x < 0 ? 0 : 1;
         Color TargetColor = Hit.GetComponent<Renderer>().material.color;
         AddToLane(Lane, TargetColor);
         Destroy(Hit.gameObject);
     }
 
-    void GameOver() {
+    public void GameOver() {
         if (!Menu.Instance.GameOverUI.activeSelf) {
             Menu.Instance.GameOverUI.SetActive(true);
             Menu.Instance.GameOverScore.text = Score.ToString();
