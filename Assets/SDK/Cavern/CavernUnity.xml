@@ -504,6 +504,12 @@
             <summary>Copy the settings of another <see cref="T:Cavern.AudioSource3D"/>.</summary>
             <param name="From">Target source</param>
         </member>
+        <member name="M:Cavern.AudioSource3D.PlayClipAtPoint(UnityEngine.AudioClip,UnityEngine.Vector3,System.Single)">
+            <summary>Play a clip once at the given world position.</summary>
+            <param name="Clip">Target clip</param>
+            <param name="Position">World position of the clip</param>
+            <param name="Volume">Playback volume</param>
+        </member>
         <member name="M:Cavern.AudioSource3D.RolloffLogarithmic">
             <summary>Logarithmic rolloff by distance.</summary>
         </member>
