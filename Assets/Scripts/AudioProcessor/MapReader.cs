@@ -4,13 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-
+using UnityEngine.UI;
 using Random = System.Random;
 
 namespace AudioProcessor {
     public class MapReader : MonoBehaviour {
         const bool DebugMode = false;
 
+        public Text Progress;
         public AudioClip Song;
         public int ChunkSize = 16384;
         public int Subchunks = 4;
@@ -19,8 +20,6 @@ namespace AudioProcessor {
         [Tooltip("Hit detection decay rate. Higher values increase difficulty.")]
         public float Decay = .05f;
         public GameModeType Mode;
-
-        [NonSerialized] public string Progress;
 
         bool ReadyToPlay;
         /// <summary>
@@ -33,6 +32,7 @@ namespace AudioProcessor {
         float[] ChunkCache;
         float[] Samples;
         int Channels, SampleRate, ChunkStep;
+        string ProgressText;
         string SongName;
         Random Rand;
         Task Worker;
@@ -54,7 +54,7 @@ namespace AudioProcessor {
         int Box = 0;
 
         float[] GetChunkRMS() {
-            Progress = "Preparing chunk division";
+            ProgressText = "Preparing chunk division...";
             int SampleCount = Samples.Length;
             int Chunks = SampleCount / ChunkSize * Subchunks - (Subchunks - 1);
             float[] ChunkRMS = new float[Chunks];
@@ -64,13 +64,13 @@ namespace AudioProcessor {
                 for (int Sample = ChunkStart; Sample < ChunkEnd; Sample += Channels) // TODO: handle multichannel properly, left / right structures
                     ThisRMS += Samples[Sample] * Samples[Sample];
                 ChunkRMS[Chunk] = Mathf.Sqrt(ThisRMS / ChunkSize);
-                Progress = "Chunk division: " + (Chunk / (float)Chunks).ToString("0%");
+                ProgressText = "Chunk division: " + (Chunk / (float)Chunks).ToString("0%");
             }
             return ChunkRMS;
         }
 
         float[] Smooth(float[] Input) {
-            Progress = "Smoothing";
+            ProgressText = "Smoothing...";
             float[] Smoothed = new float[Input.Length];
             float SmoothDiv = 1f / (2 * Smoothing + 1);
             for (int i = Smoothing, e = Input.Length - Smoothing - 1; i < e; ++i) {
@@ -91,6 +91,7 @@ namespace AudioProcessor {
         }
 
         void Loader() {
+            ProgressText = "";
             int Seed = 0;
             for (int i = 0, c = SongName.Length; i < c; ++i)
                 Seed += SongName[i];
@@ -135,6 +136,7 @@ namespace AudioProcessor {
                     ModeClass = new FreeForAll();
                     break;
             }
+            Progress.transform.parent.gameObject.SetActive(true);
             Worker = new Task(Loader);
             Worker.Start();
         }
@@ -170,19 +172,23 @@ namespace AudioProcessor {
         }
 
         void Update() {
-            if (!Spawned && ReadyToPlay) {
-                Spawned = true;
-                if (CollectorInstance) Destroy(CollectorInstance.gameObject);
-                if (DispenserInstance) Destroy(DispenserInstance.gameObject);
-                CollectorInstance = Instantiate(Menu.Instance.Collector).GetComponent<ScoreCollector>();
-                DispenserInstance = Instantiate(Menu.Instance.Dispenser).GetComponent<CubeDispenser>();
-                DispenserInstance.Boxes = Boxes;
-                DispenserInstance.Song = Song;
-                DispenserInstance.OnSongEnd += CollectorInstance.GameOver;
-                if (!DebugMode)
+            if (!Spawned) {
+                Progress.text = ProgressText;
+                if (ReadyToPlay) {
+                    Progress.transform.parent.gameObject.SetActive(false);
+                    Spawned = true;
+                    if (CollectorInstance) Destroy(CollectorInstance.gameObject);
+                    if (DispenserInstance) Destroy(DispenserInstance.gameObject);
+                    CollectorInstance = Instantiate(Menu.Instance.Collector).GetComponent<ScoreCollector>();
+                    DispenserInstance = Instantiate(Menu.Instance.Dispenser).GetComponent<CubeDispenser>();
+                    DispenserInstance.Boxes = Boxes;
+                    DispenserInstance.Song = Song;
+                    DispenserInstance.OnSongEnd += CollectorInstance.GameOver;
+                    if (!DebugMode)
 #pragma warning disable CS0162 // Unreachable code detected
-                    Destroy(gameObject);
+                        Destroy(gameObject);
 #pragma warning restore CS0162 // Unreachable code detected
+                }
             }
             if (Spawned && !DispenserInstance)
                 Destroy(gameObject);

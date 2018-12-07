@@ -66,9 +66,14 @@ public class ScoreCollector : MonoBehaviour {
     }
 
     public void GameOver() {
-        if (!Menu.Instance.GameOverUI.activeSelf) {
-            Menu.Instance.GameOverUI.SetActive(true);
-            Menu.Instance.GameOverScore.text = Score.ToString();
+        Menu Base = Menu.Instance;
+        if (!Base.GameOverUI.activeSelf) {
+            Base.GameOverUI.SetActive(true);
+            Base.GameOverScore.text = Score.ToString();
+            string Song = Base.SongName;
+            if (!Base.HighScores.ContainsKey(Song) || Base.HighScores[Song] < Score)
+                Base.HighScores[Song] = Score;
+            Base.GameOverHighScore.text = Base.HighScores[Song].ToString();
         }
     }
 

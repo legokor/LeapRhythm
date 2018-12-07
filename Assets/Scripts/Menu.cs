@@ -3,6 +3,7 @@ using GameModes;
 using LeapVR;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,7 +20,7 @@ public class Menu : MonoBehaviour {
     public Toggle FFATicker;
 
     public GameObject GameOverUI;
-    public Text GameOverScore;
+    public Text LoadingText, GameOverScore, GameOverHighScore;
 
     GameModeType GameMode = GameModeType.FreeForAll;
 
@@ -27,9 +28,13 @@ public class Menu : MonoBehaviour {
     FileInfo LastSong;
     LeapMouse Mouse;
     FilePicker Picker = new FilePicker();
-    MapReader Reader;
+
+    public Dictionary<string, int> HighScores = new Dictionary<string, int>();
+    public string SongName => LastSong.Name.Substring(0, LastSong.Name.LastIndexOf('.'));
 
     Dictionary<GameModeType, Toggle> ModeSwitchers = new Dictionary<GameModeType, Toggle>();
+
+    const string HighScoresFile = "HighScores.txt";
 
     void Start() {
         if (Instance)
@@ -40,6 +45,17 @@ public class Menu : MonoBehaviour {
         Picker.Folder = PlayerPrefs.GetString("Folder", "\\");
         Picker.OnFileLoaded += StartSong;
         ModeSwitchers.Add(GameModeType.FreeForAll, FFATicker);
+        string[] ScoresIn;
+        try {
+            ScoresIn = File.ReadAllLines(HighScoresFile);
+        } catch {
+            return;
+        }
+        foreach (string Score in ScoresIn) {
+            int SeparatorPos = Score.IndexOf('\\'), Parsed;
+            if (SeparatorPos != -1 && int.TryParse(Score.Substring(SeparatorPos + 1), out Parsed))
+                HighScores[Score.Substring(0, SeparatorPos)] = Parsed;
+        }
     }
 
     public void ShowPicker() {
@@ -65,13 +81,13 @@ public class Menu : MonoBehaviour {
 
     void StartSong(FileInfo Loaded) {
         LastSong = Loaded;
-        Reader = (new GameObject()).AddComponent<MapReader>();
+        MapReader Reader = (new GameObject()).AddComponent<MapReader>();
         Reader.Mode = GameMode;
         WWW Loader = new WWW("file://" + Loaded.FullName);
         while (!Loader.isDone) ;
+        Reader.name = SongName;
+        Reader.Progress = LoadingText;
         Reader.Song = Loader.GetAudioClip();
-        int LastDot = Loaded.Name.LastIndexOf('.');
-        Reader.name = Loaded.Name.Substring(0, LastDot);
     }
 
     public void GameOver() {
@@ -97,10 +113,6 @@ public class Menu : MonoBehaviour {
     }
 
     void OnGUI() {
-        if (Reader) {
-            GUI.Label(new Rect(0, 0, Screen.width, Screen.height), Reader.Progress);
-            return;
-        }
         Picker.OnGUI(1);
     }
 
@@ -123,5 +135,12 @@ public class Menu : MonoBehaviour {
     void OnDestroy() {
         PlayerPrefs.SetString("Folder", Picker.Folder);
         PlayerPrefs.Save();
+        StringBuilder ScoresOut = new StringBuilder();
+        Dictionary<string, int>.Enumerator Enumer = HighScores.GetEnumerator();
+        while (Enumer.MoveNext())
+            ScoresOut.Append(Enumer.Current.Key).Append("\\").Append(Enumer.Current.Value);
+        try {
+            File.WriteAllText(HighScoresFile, ScoresOut.ToString());
+        } catch { }
     }
 }
