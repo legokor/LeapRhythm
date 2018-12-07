@@ -9,6 +9,7 @@ public class ScoreCollector : MonoBehaviour {
 
     public GameObject ScoreAddition;
     public AudioClip Slash;
+    public float SlashVolume = .1f;
     public Text ScoreDisplay;
 
     public int LaneCount = 1;
@@ -61,7 +62,7 @@ public class ScoreCollector : MonoBehaviour {
     public void OnHit(Target Hit) {
         if (Menu.Instance.GameOverUI.activeSelf)
             return;
-        AudioSource3D.PlayClipAtPoint(Slash, Hit.transform.position);
+        AudioSource3D.PlayClipAtPoint(Slash, Hit.transform.position, SlashVolume);
         int Lane = Hit.transform.position.x < 0 ? 0 : 1;
         Color TargetColor = Hit.GetComponent<Renderer>().material.color;
         AddToLane(Lane, TargetColor);
