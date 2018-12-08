@@ -316,6 +316,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ScoreAddition: {fileID: 1987701612245764, guid: 4197829089c2d114d8c322f48145120a,
     type: 2}
+  Slash: {fileID: 8300000, guid: 9c22eea25e7875348832fdeeff708cd1, type: 3}
+  SlashVolume: 0.15
   ScoreDisplay: {fileID: 114830040191246154}
   LaneCount: 2
   LaneElements:
