@@ -7,7 +7,7 @@ namespace LeapVR {
     /// Unity UI mouse simulation for Leap Motion.
     /// </summary>
     [DefaultExecutionOrder(int.MinValue + 1000 + 100)]
-    [AddComponentMenu("Leap VR / Leap Mouse")]
+    [AddComponentMenu("Leap VR/Leap Mouse")]
     public class LeapMouse : Singleton<LeapMouse> {
         [Tooltip("Cursor texture.")]
         public Texture MouseIcon;

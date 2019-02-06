@@ -4,7 +4,7 @@ namespace LeapVR {
     /// <summary>
     /// Move and rotate an object with hand gestures.
     /// </summary>
-    [AddComponentMenu("Leap VR / Interaction / Object Transformer")]
+    [AddComponentMenu("Leap VR/Interaction/Object Transformer")]
     public class ObjectTransformer : MonoBehaviour {
         public Transform Target;
 

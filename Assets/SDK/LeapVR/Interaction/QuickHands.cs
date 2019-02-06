@@ -8,7 +8,7 @@ namespace LeapVR {
     /// <summary>
     /// Shows the detected hands relative to the controller.
     /// </summary>
-    [AddComponentMenu("Leap VR / Interaction / Quick Hands")]
+    [AddComponentMenu("Leap VR/Interaction/Quick Hands")]
     public class QuickHands : MonoBehaviour {
         LeapMotion Leap;
 

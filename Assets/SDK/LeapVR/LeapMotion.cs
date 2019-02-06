@@ -7,7 +7,7 @@ namespace LeapVR {
     /// Leap Motion handling simplified.
     /// </summary>
     [DefaultExecutionOrder(int.MinValue + 1000)]
-    [AddComponentMenu("Leap VR / Leap Motion")]
+    [AddComponentMenu("Leap VR/Leap Motion")]
     public class LeapMotion : Singleton<LeapMotion> {
         public bool HeadMounted = true;
         [Tooltip("Lower values of hand detection bounds.")]

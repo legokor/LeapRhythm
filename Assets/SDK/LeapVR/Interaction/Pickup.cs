@@ -5,7 +5,7 @@ namespace LeapVR {
     /// <summary>
     /// Grabbable object marker.
     /// </summary>
-    [AddComponentMenu("Leap VR / Interaction / Pickup")]
+    [AddComponentMenu("Leap VR/Interaction/Pickup")]
     public class Pickup : MonoBehaviour {
         public float GrabRange = .3f;
         public Vector3 GrabOffset;

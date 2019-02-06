@@ -4,7 +4,7 @@ namespace LeapVR {
     /// <summary>
     /// A palm able to pick up objects.
     /// </summary>
-    [AddComponentMenu("Leap VR / Interaction / Grabbing Palm")]
+    [AddComponentMenu("Leap VR/Interaction/Grabbing Palm")]
     public class GrabbingPalm : MonoBehaviour {
         public int HandID;
 

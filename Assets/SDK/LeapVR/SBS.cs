@@ -7,7 +7,7 @@ namespace LeapVR {
     /// <summary>
     /// Generic non-distorted Side-by-Side 3D.
     /// </summary>
-    [AddComponentMenu("Leap VR / Side-by-Side 3D")]
+    [AddComponentMenu("Leap VR/Side-by-Side 3D")]
     public class SBS : Singleton<SBS> {
         public bool EnableInstantly = false;
 

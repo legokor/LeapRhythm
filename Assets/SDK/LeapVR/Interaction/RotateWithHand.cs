@@ -4,7 +4,7 @@ namespace LeapVR {
     /// <summary>
     /// Copy a hand's rotation to an object.
     /// </summary>
-    [AddComponentMenu("Leap VR / Interaction / Rotate With Hand")]
+    [AddComponentMenu("Leap VR/Interaction/Rotate With Hand")]
     public class RotateWithHand : MonoBehaviour {
         public int HandID;
 
